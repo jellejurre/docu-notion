@@ -268,7 +268,8 @@ function getFrontMatter(page: NotionPage): string {
   let frontmatter = "---\n";
   frontmatter += `title: ${page.nameOrTitle.replaceAll(":", "-")}\n`; // I have not found a way to escape colons
   frontmatter += `sidebar_position: ${page.order}\n`;
-  frontmatter += `slug: ${page.slug ?? ""}\n`;
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  frontmatter += `slug: ${(((page as any).metadata.properties.Slug == undefined || (page as any).metadata.properties.Slug.rich_text.length == 0)  ? (page as any).metadata.properties.Name.title[0].plain_text : (page as any).metadata.properties.Slug.rich_text[0].text.content).replace(" ", "-").replace(" ", "-")}\n`;
   if (page.keywords) frontmatter += `keywords: [${page.keywords}]\n`;
   frontmatter += `last_edited: ${(page.metadata as any).last_edited_time as string}\n`
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions,@typescript-eslint/no-unsafe-return
