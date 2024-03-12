@@ -10,7 +10,7 @@ export function convertInternalUrl(
   context: IDocuNotionContext,
   url: string
 ): string | undefined {
-  const kGetIDFromNotionURL = /https:\/\/www\.notion\.so\S+-([a-z,0-9]+)+.*/;
+  const kGetIDFromNotionURL = /https:\/\/www\.notion\.so\/([a-z,0-9]+)+.*/;
   const match = kGetIDFromNotionURL.exec(url);
   if (match === null) {
     warning(
@@ -40,9 +40,7 @@ function convertInternalLink(
   context: IDocuNotionContext,
   markdownLink: string
 ): string {
-  // match both [foo](/123) and [bar](https://www.notion.so/123) <-- the "mention" link style
-  const linkRegExp =
-    /\[([^\]]+)?\]\((?:https?:\/\/www\.notion\.so\/|\/)?([^),^/]+)\)/g;
+  const linkRegExp = /\[(.*)]\(https:\/\/www\.notion\.so\/([a-z,0-9]+)+.*/;
   const match = linkRegExp.exec(markdownLink);
   if (match === null) {
     warning(
@@ -51,7 +49,7 @@ function convertInternalLink(
     return markdownLink;
   }
 
-  const labelFromNotion = match[1] || "";
+  const name = match[1]
   const hrefFromNotion = match[2];
 
   // verbose(
@@ -61,7 +59,7 @@ function convertInternalLink(
   const pages = context.pages;
   // find the page where pageId matches hrefFromNotion
   const targetPage = pages.find(p => {
-    return p.matchesLinkId(hrefFromNotion);
+    return (p.metadata as any).url.includes(hrefFromNotion);
   });
 
   if (!targetPage) {
@@ -72,9 +70,11 @@ function convertInternalLink(
     return "**[Problem Internal Link]**";
   }
 
-  const label = convertLinkLabel(targetPage, labelFromNotion);
-  const url = convertLinkHref(context, targetPage, hrefFromNotion);
-  return `[${label}](${url})`;
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  warning(`${hrefFromNotion}: ${JSON.stringify((targetPage as any).metadata.properties.Slug)}`)
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  const url = `/docs${targetPage.layoutContext}/${((targetPage as any).metadata.properties.Slug == undefined || (targetPage as any).metadata.properties.Slug.rich_text.length == 0)  ? (targetPage as any).metadata.properties.Name.title[0].plain_text : (targetPage as any).metadata.properties.Slug.rich_text[0].text.content }`.replace(" ", "-").replace(" ", "-")//convertLinkHref(context, targetPage, hrefFromNotion);
+  return `[${name}](${url})`;
 }
 
 function convertLinkLabel(targetPage: NotionPage, text: string): string {
@@ -127,10 +127,7 @@ export const standardInternalLinkConversion: IPlugin = {
     // (has some other text that's been turned into a link) or "raw".
     // Raw links come in without a leading slash, e.g. [link_to_page](4a6de8c0-b90b-444b-8a7b-d534d6ec71a4)
     // Inline links come in with a leading slash, e.g. [pointer to the introduction](/4a6de8c0b90b444b8a7bd534d6ec71a4)
-    // "Mention" links come in as full URLs, e.g. [link_to_page](https://www.notion.so/62f1187010214b0883711a1abb277d31)
-    // YOu can create them either with @+the name of a page, or by pasting a URL and then selecting the "Mention" option.
-    match:
-      /\[([^\]]+)?\]\((?!mailto:)(https:\/\/www\.notion\.so\/[^),^/]+|\/?[^),^/]+)\)/,
+    match: /https:\/\/www\.notion\.so\/([a-z,0-9]+)+.*/,
     convert: convertInternalLink,
   },
 };
