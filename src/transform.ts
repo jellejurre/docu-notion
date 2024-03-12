@@ -272,7 +272,7 @@ function getFrontMatter(page: NotionPage): string {
   if (page.keywords) frontmatter += `keywords: [${page.keywords}]\n`;
   frontmatter += `last_edited: ${(page.metadata as any).last_edited_time as string}\n`
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions,@typescript-eslint/no-unsafe-return
-  frontmatter += `contributors: ${(page as any).metadata.properties.Contributors.rich_text.map(((x: any) => x.text.link != undefined ? `[${x.text.content}](${x.text.link.url})` : x.text.content )).join('') as string}\n`;
+  frontmatter += `contributors: "${(page as any).metadata.properties.Contributors.rich_text.map(((x: any) => x.text.link != undefined ? `[${x.text.content}](${x.text.link.url})` : x.text.content )).join('') as string}"\n`;
 
   frontmatter += "---\n";
   return frontmatter;
