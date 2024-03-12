@@ -71,8 +71,6 @@ function convertInternalLink(
   }
 
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  warning(`${hrefFromNotion}: ${JSON.stringify((targetPage as any).metadata.properties.Slug)}`)
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   const url = `/docs${targetPage.layoutContext}/${((targetPage as any).metadata.properties.Slug == undefined || (targetPage as any).metadata.properties.Slug.rich_text.length == 0)  ? (targetPage as any).metadata.properties.Name.title[0].plain_text : (targetPage as any).metadata.properties.Slug.rich_text[0].text.content }`.replace(" ", "-").replace(" ", "-")//convertLinkHref(context, targetPage, hrefFromNotion);
   return `[${name}](${url})`;
 }
