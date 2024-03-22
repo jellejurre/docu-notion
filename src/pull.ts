@@ -55,6 +55,11 @@ const counts = {
   error_because_no_slug: 0,
 };
 
+let token : string;
+export function GetNotionClient() : Client{
+  return initNotionClient(token);
+}
+
 export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -64,7 +69,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     optionsForLogging.notionToken.substring(0, 10) + "...";
 
   const config = await loadConfigAsync();
-
+  token = options.notionToken;
   verbose(`Options:${JSON.stringify(optionsForLogging, null, 2)}`);
   await initImageHandling(
     options.imgPrefixInMarkdown || options.imgOutputPath || "",
@@ -72,8 +77,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     options.locales
   );
 
-  const notionClient = initNotionClient(options.notionToken);
-  notionToMarkdown = new NotionToMarkdown({ notionClient });
+  notionToMarkdown = new NotionToMarkdown({ notionClient: GetNotionClient() });
 
   layoutStrategy = new HierarchicalNamedLayoutStrategy();
 
@@ -87,7 +91,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
   try {
     await executeWithRateLimitAndRetries("retrieving root page", async () => {
-      await notionClient.pages.retrieve({ page_id: options.rootPage });
+      await GetNotionClient().pages.retrieve({ page_id: options.rootPage });
     });
   } catch (e: any) {
     error(
@@ -291,11 +295,9 @@ const notionLimiter = new RateLimiter({
   interval: "second",
 });
 
-let notionClient: Client;
-
 async function getPageMetadata(id: string): Promise<GetPageResponse> {
   return await executeWithRateLimitAndRetries(`pages.retrieve(${id})`, () => {
-    return notionClient.pages.retrieve({
+    return GetNotionClient().pages.retrieve({
       page_id: id,
     });
   });
@@ -360,7 +362,7 @@ async function getBlockChildren(id: string): Promise<NotionBlock[]> {
   do {
     const response: ListBlockChildrenResponse =
       await executeWithRateLimitAndRetries(`getBlockChildren(${id})`, () => {
-        return notionClient.blocks.children.list({
+        return GetNotionClient().blocks.children.list({
           start_cursor: start_cursor as string | undefined,
           block_id: id,
         });
@@ -387,7 +389,7 @@ async function getBlockChildren(id: string): Promise<NotionBlock[]> {
   return result;
 }
 export function initNotionClient(notionToken: string): Client {
-  notionClient = new Client({
+  const notionClient = new Client({
     auth: notionToken,
   });
   return notionClient;
