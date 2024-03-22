@@ -69,7 +69,7 @@ async function getColumnWidth(
     `unofficialNotionClient.getPage(${blockId}) in getColumnWidth()`,
     () => {
       // Yes, it is odd to call 'getPage' for a block, but that's how we access the format info.
-      return unofficialNotionClient.getPage(blockId);
+      return unofficialNotionClient.getPage(blockId, { signFileUrls: false });
     }
   );
   const blockResult = recordMap.block[blockId];
