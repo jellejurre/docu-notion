@@ -9,7 +9,7 @@ export async function run(): Promise<void> {
   const pkg = require("../package.json");
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   console.log(`docu-notion version ${pkg.version}`);
-
+  process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
   program.name("docu-notion").description("");
   program.usage("-n <token> -r <root> [options]");
   program
