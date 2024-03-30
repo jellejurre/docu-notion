@@ -49,9 +49,8 @@ function convertInternalLink(
     return markdownLink;
   }
 
-  const name = match[1]
+  let name = match[1]
   const hrefFromNotion = match[2];
-
   // verbose(
   //   `[standardInternalLinkConversion] Converting ${markdownLink} with has url ${hrefFromNotion}`
   // );
@@ -68,6 +67,10 @@ function convertInternalLink(
       `[standardInternalLinkConversion] Could not find the target of this link. Note that links to outline sections are not supported. ${markdownLink}. https://github.com/sillsdev/docu-notion/issues/9`
     );
     return "**[Problem Internal Link]**";
+  }
+  if (name == "Untitled"){
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    name = targetPage.nameOrTitle!;
   }
 
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
