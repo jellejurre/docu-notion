@@ -35,7 +35,11 @@ export const standardVideoTransformer: IPlugin = {
         }
 
         context.imports.push(`import ReactPlayer from "react-player";`);
-        return `<ReactPlayer controls url="${url}" /><GreyItalicText>${(block as VideoBlockObjectResponse).video.caption[0].plain_text}</GreyItalicText>`;
+        if ((block as VideoBlockObjectResponse).video.caption[0] != undefined){
+          return `<ReactPlayer controls url="${url}" /><GreyItalicText>${(block as VideoBlockObjectResponse).video.caption[0].plain_text}</GreyItalicText>`;
+        } else {
+          return `<ReactPlayer controls url="${url}" />`;
+        }
       },
     },
   ],
