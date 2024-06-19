@@ -327,11 +327,11 @@ export async function executeWithRateLimitAndRetries<T>(
         e?.code === "service_unavailable" || true
       ) {
         const secondsToWait = i + 1;
-        warning(
-          `While doing "${label}", got error "${
-            e.message as string
-          }". Will retry after ${secondsToWait}s...`
-        );
+        // warning(
+        //   `While doing "${label}", got error "${
+        //     e.message as string
+        //   }". Will retry after ${secondsToWait}s...`
+        // );
         await new Promise(resolve => setTimeout(resolve, 1000 * secondsToWait));
       } else {
         throw e;
