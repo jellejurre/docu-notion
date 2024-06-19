@@ -324,7 +324,7 @@ export async function executeWithRateLimitAndRetries<T>(
         e.message.includes("limit") ||
         e.message.includes("Limit") ||
         e?.code === "notionhq_client_response_error" ||
-        e?.code === "service_unavailable"
+        e?.code === "service_unavailable" || true
       ) {
         const secondsToWait = i + 1;
         warning(
